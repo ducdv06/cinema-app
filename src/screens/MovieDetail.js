@@ -13,6 +13,7 @@ import { Ionicons, Feather, FontAwesome } from "@expo/vector-icons";
 import BottomTabs from "../navigation/BottomTabs";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDownload } from "../context/DownloadContext";
+import { useWishlist } from "../context/WishlistContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -79,6 +80,7 @@ export default function MovieDetail() {
   const [shareVisible, setShareVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { addDownload } = useDownload();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const movieData = movie || {
     id: "1",
@@ -90,9 +92,7 @@ export default function MovieDetail() {
     image: POSTER_IMAGES["Spider-Man: No Way Home"],
   };
 
-  // Lấy ảnh đúng cho phim
   const posterImage = movieData.image || POSTER_IMAGES[movieData.title] || POSTER_IMAGES["Spider-Man: No Way Home"];
-  
   const storyData = STORY_DATA[movieData.title] || {
     full: "No description available.",
     short: "No description available.",
@@ -121,8 +121,15 @@ export default function MovieDetail() {
           <Text style={styles.headerTitle} numberOfLines={1}>
             {movieData.title}
           </Text>
-          <TouchableOpacity style={styles.heartBtn}>
-            <Ionicons name="heart" size={24} color="#FB4141" />
+          <TouchableOpacity 
+            style={styles.heartBtn}
+            onPress={() => toggleWishlist(movieData)}
+          >
+            <Ionicons 
+              name={isInWishlist(movieData.id) ? "heart" : "heart-outline"} 
+              size={24} 
+              color={isInWishlist(movieData.id) ? "#FB4141" : "#FFF"} 
+            />
           </TouchableOpacity>
         </View>
 
@@ -231,215 +238,39 @@ export default function MovieDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1F1D2B",
-    paddingTop: 52,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    marginBottom: 20,
-  },
-  headerTitle: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 16,
-    flex: 1,
-    marginHorizontal: 10,
-    textAlign: "center",
-  },
-  heartBtn: {
-    backgroundColor: "#252836",
-    padding: 6,
-    borderRadius: 12,
-  },
-  posterContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-  poster: {
-    width: width * 0.5,
-    height: height * 0.35,
-    borderRadius: 20,
-    backgroundColor: "#252836",
-  },
-  iconSmall: {
-    width: 16,
-    height: 16,
-    resizeMode: "contain",
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  infoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  infoText: {
-    marginLeft: 6,
-    color: "#92929D",
-    fontFamily: "MontserratMedium",
-    fontSize: 12,
-  },
-  dotSeparator: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#92929D",
-    marginHorizontal: 10,
-  },
-  ratingRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  ratingText: {
-    color: "#FF8700",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 14,
-    marginLeft: 6,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 24,
-  },
-  playBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FF8700",
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 30,
-    marginRight: 16,
-  },
-  playText: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  circleBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#252836",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 6,
-  },
-  storyContainer: {
-    marginTop: 28,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  storyText: {
-    color: "#EBEBEF",
-    fontFamily: "MontserratRegular",
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  moreText: {
-    color: "#12CDD9",
-    fontFamily: "MontserratSemiBold",
-  },
-  castContainer: {
-    marginTop: 24,
-    marginBottom: 100,
-    paddingHorizontal: 24,
-  },
-  castItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  castAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#252836",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  castAvatarText: {
-    color: "#12CDD9",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 16,
-  },
-  castInfo: {
-    flex: 1,
-  },
-  castName: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 14,
-  },
-  castRole: {
-    color: "#92929D",
-    fontFamily: "MontserratMedium",
-    fontSize: 12,
-    marginTop: 2,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  shareModal: {
-    width: width * 0.8,
-    backgroundColor: "#252836",
-    borderRadius: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    alignItems: "center",
-  },
-  closeBtn: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(31,29,43,0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  shareTitle: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 18,
-    marginTop: 20,
-  },
-  shareRow: {
-    flexDirection: "row",
-    marginTop: 30,
-    gap: 20,
-    marginBottom: 20,
-  },
-  socialBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#1F1D2B",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { flex: 1, backgroundColor: "#1F1D2B", paddingTop: 52 },
+  scrollView: { flex: 1 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 24, marginBottom: 20 },
+  headerTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 16, flex: 1, marginHorizontal: 10, textAlign: "center" },
+  heartBtn: { backgroundColor: "#252836", padding: 6, borderRadius: 12 },
+  posterContainer: { alignItems: "center", marginTop: 10 },
+  poster: { width: width * 0.5, height: height * 0.35, borderRadius: 20, backgroundColor: "#252836" },
+  iconSmall: { width: 16, height: 16, resizeMode: "contain" },
+  infoRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 20 },
+  infoItem: { flexDirection: "row", alignItems: "center" },
+  infoText: { marginLeft: 6, color: "#92929D", fontFamily: "MontserratMedium", fontSize: 12 },
+  dotSeparator: { width: 4, height: 4, borderRadius: 2, backgroundColor: "#92929D", marginHorizontal: 10 },
+  ratingRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 12 },
+  ratingText: { color: "#FF8700", fontFamily: "MontserratSemiBold", fontSize: 14, marginLeft: 6 },
+  buttonRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 24 },
+  playBtn: { flexDirection: "row", alignItems: "center", backgroundColor: "#FF8700", paddingHorizontal: 32, paddingVertical: 12, borderRadius: 30, marginRight: 16 },
+  playText: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 16, marginLeft: 8 },
+  circleBtn: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#252836", justifyContent: "center", alignItems: "center", marginHorizontal: 6 },
+  storyContainer: { marginTop: 28, paddingHorizontal: 24 },
+  sectionTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 16, marginBottom: 10 },
+  storyText: { color: "#EBEBEF", fontFamily: "MontserratRegular", fontSize: 14, lineHeight: 22 },
+  moreText: { color: "#12CDD9", fontFamily: "MontserratSemiBold" },
+  castContainer: { marginTop: 24, marginBottom: 100, paddingHorizontal: 24 },
+  castItem: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  castAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#252836", justifyContent: "center", alignItems: "center", marginRight: 12 },
+  castAvatarText: { color: "#12CDD9", fontFamily: "MontserratSemiBold", fontSize: 16 },
+  castInfo: { flex: 1 },
+  castName: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 14 },
+  castRole: { color: "#92929D", fontFamily: "MontserratMedium", fontSize: 12, marginTop: 2 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" },
+  shareModal: { width: width * 0.8, backgroundColor: "#252836", borderRadius: 20, paddingVertical: 24, paddingHorizontal: 20, alignItems: "center" },
+  closeBtn: { position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(31,29,43,0.8)", justifyContent: "center", alignItems: "center" },
+  shareTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 18, marginTop: 20 },
+  shareRow: { flexDirection: "row", marginTop: 30, gap: 20, marginBottom: 20 },
+  socialBtn: { width: 50, height: 50, borderRadius: 25, backgroundColor: "#1F1D2B", justifyContent: "center", alignItems: "center" },
 });
