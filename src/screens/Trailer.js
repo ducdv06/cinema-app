@@ -6,11 +6,65 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  FlatList,
 } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import BottomTabs from "../navigation/BottomTabs";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useWishlist } from "../context/WishlistContext";
+
+// Dữ liệu Cast and Crew theo từng phim
+const CAST_CREW_DATA = {
+  "The Batman": {
+    cast: [
+      { name: "Robert Pattinson", role: "Batman", avatar: "RP" },
+      { name: "Zoë Kravitz", role: "Catwoman", avatar: "ZK" },
+      { name: "Paul Dano", role: "Riddler", avatar: "PD" },
+      { name: "Colin Farrell", role: "Penguin", avatar: "CF" },
+    ],
+    crew: [
+      { name: "Matt Reeves", role: "Director", avatar: "MR" },
+      { name: "Peter Craig", role: "Writer", avatar: "PC" },
+    ],
+    gallery: [
+      require("../../assets/img/batman-trailer.png"),
+      require("../../assets/img/Batman-poster.png"),
+      require("../../assets/img/batman-trailer.png"),
+    ],
+  },
+  "Black Panther: Wakanda Forever": {
+    cast: [
+      { name: "Letitia Wright", role: "Shuri", avatar: "LW" },
+      { name: "Lupita Nyong'o", role: "Nakia", avatar: "LN" },
+      { name: "Danai Gurira", role: "Okoye", avatar: "DG" },
+      { name: "Tenoch Huerta", role: "Namor", avatar: "TH" },
+    ],
+    crew: [
+      { name: "Ryan Coogler", role: "Director", avatar: "RC" },
+      { name: "Joe Robert Cole", role: "Writer", avatar: "JC" },
+    ],
+    gallery: [
+      require("../../assets/img/black-panther-poster.png"),
+      require("../../assets/img/black_panther_video_trailer.jpg"),
+    ],
+  },
+  "Minions: The Rise of Gru": {
+    cast: [
+      { name: "Steve Carell", role: "Gru", avatar: "SC" },
+      { name: "Pierre Coffin", role: "Minions", avatar: "PC" },
+      { name: "Taraji P. Henson", role: "Belle Bottom", avatar: "TH" },
+      { name: "Michelle Yeoh", role: "Master Chow", avatar: "MY" },
+    ],
+    crew: [
+      { name: "Kyle Balda", role: "Director", avatar: "KB" },
+      { name: "Brad Ableson", role: "Co-Director", avatar: "BA" },
+    ],
+    gallery: [
+      require("../../assets/img/minion-poster.png"),
+      require("../../assets/img/minions_video.jpg"),
+    ],
+  },
+};
 
 export default function Trailer() {
   const navigation = useNavigation();
@@ -22,11 +76,8 @@ export default function Trailer() {
   const getTrailerImage = (title) => {
     const trailers = {
       "The Batman": require("../../assets/img/batman-trailer.png"),
-      "Batman": require("../../assets/img/batman-trailer.png"),
       "Black Panther: Wakanda Forever": require("../../assets/img/black_panther_video_trailer.jpg"),
-      "Black Panther": require("../../assets/img/black_panther_video_trailer.jpg"),
       "Minions: The Rise of Gru": require("../../assets/img/minions_video.jpg"),
-      "Minions": require("../../assets/img/minions_video.jpg"),
     };
     return trailers[title] || require("../../assets/img/batman-trailer.png");
   };
@@ -40,10 +91,10 @@ export default function Trailer() {
     genre: "Action",
     date: "March 2, 2022",
     image: require("../../assets/img/Batman-poster.png"),
-    trailer: require("../../assets/img/batman-trailer.png"),
   };
 
   const trailerImage = getTrailerImage(movieData.title);
+  const castCrew = CAST_CREW_DATA[movieData.title] || CAST_CREW_DATA["The Batman"];
 
   const getStoryLine = (title) => {
     const stories = {
@@ -55,8 +106,12 @@ export default function Trailer() {
   };
 
   const fullStory = getStoryLine(movieData.title);
-  const shortStory = fullStory.substring(0, 180) + "...";
+  const shortStory = fullStory.substring(0, 200) + "...";
   const displayStory = isExpanded ? fullStory : shortStory;
+
+  const renderGalleryItem = ({ item, index }) => (
+    <Image key={index} source={item} style={styles.galleryImage} />
+  );
 
   return (
     <View style={styles.container}>
@@ -91,16 +146,10 @@ export default function Trailer() {
         <View style={styles.titleSection}>
           <Text style={styles.movieTitle}>{movieData.title}</Text>
           <View style={styles.metaRow}>
-            <Image source={require("../../assets/icons/calendar-icon.png")} style={styles.iconSmall} />
             <Text style={styles.metaLabel}>Release Date:</Text>
             <Text style={styles.metaValue}> {movieData.date || "March 2, 2022"}</Text>
-            <View style={styles.separator} />
-            <Image source={require("../../assets/icons/film-icon.png")} style={styles.iconSmall} />
-            <Text style={styles.metaLabel}> {movieData.genre}</Text>
-          </View>
-          <View style={styles.ratingRow}>
-            <FontAwesome name="star" size={14} color="#FF8700" />
-            <Text style={styles.ratingText}>{movieData.rating}</Text>
+            <Text style={styles.separator}> | </Text>
+            <Text style={styles.metaLabel}>{movieData.genre}</Text>
           </View>
         </View>
 
@@ -113,6 +162,55 @@ export default function Trailer() {
               {isExpanded ? " Less" : " More"}
             </Text>
           </Text>
+        </View>
+
+        {/* CAST AND CREW */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Cast and Crew</Text>
+          
+          {/* Cast */}
+          <View style={styles.castRow}>
+            {castCrew.cast.map((person, index) => (
+              <View key={index} style={styles.castItem}>
+                <View style={styles.castAvatar}>
+                  <Text style={styles.castAvatarText}>{person.avatar}</Text>
+                </View>
+                <View>
+                  <Text style={styles.castName}>{person.name}</Text>
+                  <Text style={styles.castRole}>{person.role}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+          
+          {/* Crew */}
+          <View style={styles.crewRow}>
+            {castCrew.crew.map((person, index) => (
+              <View key={index} style={styles.castItem}>
+                <View style={styles.castAvatar}>
+                  <Text style={styles.castAvatarText}>{person.avatar}</Text>
+                </View>
+                <View>
+                  <Text style={styles.castName}>{person.name}</Text>
+                  <Text style={styles.castRole}>{person.role}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* GALLERY */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Gallery</Text>
+          <FlatList
+            data={castCrew.gallery}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={renderGalleryItem}
+            contentContainerStyle={styles.galleryList}
+            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+          />
         </View>
       </ScrollView>
       <BottomTabs />
@@ -129,16 +227,22 @@ const styles = StyleSheet.create({
   videoThumbnail: { width: "100%", height: "100%", resizeMode: "cover" },
   playIconContainer: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.3)" },
   titleSection: { paddingHorizontal: 24, marginTop: 20 },
-  movieTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 20, marginBottom: 8 },
+  movieTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 20, marginBottom: 6 },
   metaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap" },
   metaLabel: { color: "#92929D", fontFamily: "MontserratMedium", fontSize: 12 },
   metaValue: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 12 },
-  separator: { width: 1, height: 14, backgroundColor: "#92929D", marginHorizontal: 8, opacity: 0.5 },
-  iconSmall: { width: 14, height: 14, resizeMode: "contain" },
-  ratingRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
-  ratingText: { color: "#FF8700", fontFamily: "MontserratSemiBold", fontSize: 13, marginLeft: 6 },
-  section: { paddingHorizontal: 24, marginTop: 24, marginBottom: 100 },
+  separator: { color: "#92929D", marginHorizontal: 4 },
+  section: { paddingHorizontal: 24, marginTop: 24 },
   sectionTitle: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 16, marginBottom: 12 },
   synopsisText: { color: "#EBEBEF", fontFamily: "MontserratRegular", fontSize: 14, lineHeight: 22 },
   moreText: { color: "#12CDD9", fontFamily: "MontserratSemiBold" },
+  castRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 16 },
+  crewRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
+  castItem: { flexDirection: "row", alignItems: "center", width: "48%", marginBottom: 12 },
+  castAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#252836", justifyContent: "center", alignItems: "center", marginRight: 10 },
+  castAvatarText: { color: "#12CDD9", fontFamily: "MontserratSemiBold", fontSize: 14 },
+  castName: { color: "#FFF", fontFamily: "MontserratSemiBold", fontSize: 13 },
+  castRole: { color: "#92929D", fontFamily: "MontserratMedium", fontSize: 11, marginTop: 2 },
+  galleryList: { paddingRight: 24 },
+  galleryImage: { width: 120, height: 80, borderRadius: 12, marginRight: 8 },
 });

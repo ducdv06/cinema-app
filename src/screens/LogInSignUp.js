@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import ButtonApp from "../components/ButtonApp";
-import { Ionicons, FontAwesome, AntDesign } from "@expo/vector-icons";
 
 export default function LoginSignUp() {
   const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -28,21 +28,14 @@ export default function LoginSignUp() {
         Enter your registered{"\n"}Phone Number to Sign Up
       </Text>
 
-      {/* Sign Up Button
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity> */}
-      <ButtonApp
-        style={styles.button}
-        onPress={() => navigation.navigate("SignUp")}
-      >
+      {/* Sign Up Button */}
+      <ButtonApp onPress={() => navigation.navigate("SignUp")}>
         Sign Up
       </ButtonApp>
 
       {/* Login */}
       <View style={styles.loginRow}>
         <Text style={styles.loginText}>I already have an account? </Text>
-
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
           <Text style={styles.loginHighlight}>Login</Text>
         </TouchableOpacity>
@@ -60,11 +53,9 @@ export default function LoginSignUp() {
         <TouchableOpacity style={styles.socialBtnWhite}>
           <Image source={require("../../assets/icons/Google.png")} />
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.socialBtnDark}>
           <Image source={require("../../assets/icons/Apple.png")} />
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.socialBtnBlue}>
           <Image source={require("../../assets/icons/Facebook.png")} />
         </TouchableOpacity>
@@ -81,21 +72,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 20,
   },
-
   logoContainer: {
     alignItems: "center",
     marginBottom: 20,
   },
-
   title: {
     color: "#FFF",
     fontSize: 28,
-    fontWeight: "600", // SemiBold
+    fontWeight: "600",
     letterSpacing: 0.12,
     fontFamily: "MontserratSemiBold",
-    // nếu đã load font custom
   },
-
   subtitle: {
     color: "#92929D",
     textAlign: "center",
@@ -111,21 +98,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 34,
   },
-
   loginText: {
     color: "#92929D",
     fontSize: 15,
     fontWeight: "500",
     fontFamily: "MontserratMedium",
   },
-
   loginHighlight: {
     color: "#12CDD9",
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "MontserratSemiBold",
   },
-
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -133,27 +117,47 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 40,
   },
-
   line: {
     flex: 1,
     height: 1,
     width: 62,
     backgroundColor: "#333",
   },
-
   dividerText: {
     marginHorizontal: 10,
     color: "#92929D",
     textAlign: "center",
     fontSize: 14,
     fontWeight: "500",
-
     fontFamily: "MontserratMedium",
   },
-
   socialContainer: {
     flexDirection: "row",
     gap: 24,
     marginTop: 40,
+  },
+  socialBtnWhite: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  socialBtnDark: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  socialBtnBlue: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#1877F2",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

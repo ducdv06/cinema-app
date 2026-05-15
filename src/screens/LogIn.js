@@ -11,12 +11,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import storage from "../utils/storage";
-
-const USERS_STORAGE_KEY = "@CinemaApp:users";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigation = useNavigation();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,25 +35,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const existingUsersJSON = await storage.getItem(USERS_STORAGE_KEY);
-      const users = existingUsersJSON ? JSON.parse(existingUsersJSON) : [];
-
-      const user = users.find(u => u.email === email && u.password === password);
-
-      if (user) {
-        const currentUser = {
-          id: user.id,
-          fullName: user.fullName,
-          email: user.email,
-          phone: user.phone || "",
-          avatar: user.avatar || null,
-          loginTime: new Date().toISOString(),
-        };
-
-        await storage.setItem("@CinemaApp:currentUser", JSON.stringify(currentUser));
-        
-        Alert.alert("Thành công", `Chào mừng ${user.fullName} trở lại!`);
-        navigation.replace("Home");
+      const success = await login(email, password);
+      
+      if (success) {
+        Alert.alert("Thành công", "Đăng nhập thành công!");
+        // KHÔNG cần navigation.replace ở đây
+        // AppNavigator sẽ tự động chuyển sang Home khi user thay đổi
       } else {
         Alert.alert("Lỗi", "Email hoặc mật khẩu không đúng");
       }
@@ -82,7 +68,7 @@ export default function Login() {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email Address</Text>
           <TextInput
-            placeholder="Tiffanyjearsey@gmail.com"
+            placeholder="example@gmail.com"
             placeholderTextColor="#8A8A9E"
             style={styles.input}
             value={email}

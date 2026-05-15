@@ -1,10 +1,17 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Image } from "react-native";
+import { StyleSheet, View, Image, ActivityIndicator } from "react-native";
 import { useFonts } from "expo-font";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { DownloadProvider } from "./src/context/DownloadContext";
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import { WishlistProvider } from "./src/context/WishlistContext";
+
+// Import screens
+import SplashScreen from "./src/screens/SplashScreen";
 import Onboarding1 from "./src/screens/Onboarding1";
 import Onboarding2 from "./src/screens/Onboarding2";
 import Onboarding3 from "./src/screens/Onboarding3";
-import SplashScreen from "./src/screens/SplashScreen";
 import LoginSignUp from "./src/screens/LogInSignUp";
 import Login from "./src/screens/LogIn";
 import SignUp from "./src/screens/SignUp";
@@ -29,13 +36,62 @@ import PrivacyPolicy from "./src/screens/PrivacyPolicy";
 import Notification from "./src/screens/Notification";
 import Language from "./src/screens/Language";
 
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { DownloadProvider } from "./src/context/DownloadContext";
-import { AuthProvider } from "./src/context/AuthContext";
-import { WishlistProvider } from "./src/context/WishlistContext";
-
 const Stack = createNativeStackNavigator();
+
+// Component điều hướng chính
+function AppNavigator() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Image source={require("./assets/img/logo.png")} style={styles.loadingLogo} />
+        <ActivityIndicator size="large" color="#12CDD9" style={{ marginTop: 20 }} />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!user ? (
+        // Chưa đăng nhập - hiển thị các màn hình auth
+        <>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Onboarding1" component={Onboarding1} />
+          <Stack.Screen name="Onboarding2" component={Onboarding2} />
+          <Stack.Screen name="Onboarding3" component={Onboarding3} />
+          <Stack.Screen name="LoginSignUp" component={LoginSignUp} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="SignUp" component={SignUp} />
+          <Stack.Screen name="ResetPassword" component={ResetPassword} />
+          <Stack.Screen name="Verification" component={Verification} />
+          <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
+        </>
+      ) : (
+        // Đã đăng nhập - vào thẳng Home
+        <>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Search" component={Search} />
+          <Stack.Screen name="Download" component={Download} />
+          <Stack.Screen name="Wishlist" component={WishList} />
+          <Stack.Screen name="MovieDetail" component={MovieDetail} />
+          <Stack.Screen name="UpcomingMovies" component={UpcomingMovie} />
+          <Stack.Screen name="Genre" component={Genre} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="MostPopularMovie" component={MostPopularMovie} />
+          <Stack.Screen name="Trailer" component={Trailer} />
+          <Stack.Screen name="SerialDetail" component={SerialDetail} />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+          <Stack.Screen name="PremiumAccount" component={PremiumAccount} />
+          <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+          <Stack.Screen name="Language" component={Language} />
+          <Stack.Screen name="Notification" component={Notification} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+}
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -64,11 +120,7 @@ export default function App() {
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingContainer}>
-        <Image
-          source={require("./assets/img/logo.png")}
-          style={styles.loadingLogo}
-          resizeMode="contain"
-        />
+        <Image source={require("./assets/img/logo.png")} style={styles.loadingLogo} />
       </View>
     );
   }
@@ -78,45 +130,11 @@ export default function App() {
       <WishlistProvider>
         <AuthProvider>
           <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Splash" component={SplashScreen} />
-              <Stack.Screen name="Onboarding1" component={Onboarding1} />
-              <Stack.Screen name="Onboarding2" component={Onboarding2} />
-              <Stack.Screen name="Onboarding3" component={Onboarding3} />
-              <Stack.Screen name="LoginSignUp" component={LoginSignUp} />
-              <Stack.Screen name="Login" component={Login} />
-              <Stack.Screen name="SignUp" component={SignUp} />
-              <Stack.Screen name="Verification" component={Verification} />
-              <Stack.Screen name="ResetPassword" component={ResetPassword} />
-              <Stack.Screen
-                name="CreateNewPassword"
-                component={CreateNewPassword}
-              />
-              <Stack.Screen name="Home" component={Home} />
-              <Stack.Screen name="Search" component={Search} />
-              <Stack.Screen name="Download" component={Download} />
-              <Stack.Screen name="Wishlist" component={WishList} />
-              <Stack.Screen name="MovieDetail" component={MovieDetail} />
-              <Stack.Screen name="UpcomingMovies" component={UpcomingMovie} />
-              <Stack.Screen name="Genre" component={Genre} />
-              <Stack.Screen name="Profile" component={Profile} />
-              <Stack.Screen
-                name="MostPopularMovie"
-                component={MostPopularMovie}
-              />
-              <Stack.Screen name="Trailer" component={Trailer} />
-              <Stack.Screen name="SerialDetail" component={SerialDetail} />
-              <Stack.Screen name="EditProfile" component={EditProfile} />
-              <Stack.Screen name="PremiumAccount" component={PremiumAccount} />
-              <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
-              <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-              <Stack.Screen name="Language" component={Language} />
-              <Stack.Screen name="Notification" component={Notification} />
-            </Stack.Navigator>
-            <StatusBar style="auto" />
+            <AppNavigator />
           </NavigationContainer>
         </AuthProvider>
       </WishlistProvider>
+      <StatusBar style="auto" />
     </DownloadProvider>
   );
 }

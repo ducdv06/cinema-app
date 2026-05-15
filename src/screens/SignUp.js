@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import storage from "../utils/storage";
-
-const USERS_STORAGE_KEY = "@CinemaApp:users";
+import { useAuth } from "../context/AuthContext";
+import ButtonApp from "../components/ButtonApp";
 
 export default function SignUp() {
   const navigation = useNavigation();
+  const { register } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,37 +26,6 @@ export default function SignUp() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const saveUser = async () => {
-    try {
-      const existingUsersJSON = await storage.getItem(USERS_STORAGE_KEY);
-      let users = existingUsersJSON ? JSON.parse(existingUsersJSON) : [];
-
-      const emailExists = users.some(user => user.email === email);
-      if (emailExists) {
-        Alert.alert("Lỗi", "Email này đã được đăng ký. Vui lòng sử dụng email khác.");
-        return false;
-      }
-
-      const newUser = {
-        id: Date.now().toString(),
-        fullName: fullName,
-        email: email,
-        password: password,
-        phone: "",
-        avatar: null,
-        createdAt: new Date().toISOString(),
-      };
-
-      users.push(newUser);
-      await storage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-      
-      return true;
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể đăng ký. Vui lòng thử lại.");
-      return false;
-    }
-  };
 
   const handleSignUp = async () => {
     if (!fullName.trim()) {
@@ -96,30 +65,35 @@ export default function SignUp() {
     }
     
     setLoading(true);
-    const success = await saveUser();
+    
+    const newUser = await register({
+      fullName,
+      email,
+      password,
+    });
+    
     setLoading(false);
     
-    if (success) {
+    if (newUser) {
       Alert.alert(
         "Thành công", 
         "Đăng ký tài khoản thành công!",
         [
           {
             text: "Đăng nhập ngay",
-            onPress: () => navigation.replace("Login")
+            onPress: () => navigation.navigate("Login")
           }
         ]
       );
+    } else {
+      Alert.alert("Lỗi", "Email đã tồn tại hoặc có lỗi xảy ra");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
           <Image source={require("../../assets/icons/back.png")} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Sign Up</Text>
@@ -146,7 +120,7 @@ export default function SignUp() {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email Address</Text>
           <TextInput
-            placeholder="Tiffanyjearsey@gmail.com"
+            placeholder="example@gmail.com"
             placeholderTextColor="#8A8A9E"
             style={styles.input}
             value={email}
@@ -204,23 +178,9 @@ export default function SignUp() {
         </View>
 
         <View style={styles.buttonWrap}>
-          <TouchableOpacity
-            onPress={handleSignUp}
-            disabled={loading}
-            style={{
-              backgroundColor: "#12CDD9",
-              width: "100%",
-              height: 56,
-              borderRadius: 28,
-              justifyContent: "center",
-              alignItems: "center",
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            <Text style={{ color: "#FFF", fontSize: 16, fontFamily: "MontserratMedium" }}>
-              {loading ? "Signing Up..." : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
+          <ButtonApp onPress={handleSignUp} disabled={loading}>
+            {loading ? "Signing Up..." : "Sign Up"}
+          </ButtonApp>
         </View>
       </View>
     </SafeAreaView>

@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import BottomTabs from "../navigation/BottomTabs";
 import { useNavigation } from "@react-navigation/native";
 import storage from "../utils/storage";
+import { useAuth } from "../context/AuthContext";
 
 const MenuItem = ({ icon, title, onPress }) => {
   return (
@@ -30,23 +31,13 @@ const MenuItem = ({ icon, title, onPress }) => {
 
 export default function Profile() {
   const navigation = useNavigation();
+  const { user, logout } = useAuth();
   const [logoutVisible, setLogoutVisible] = useState(false);
-  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadUser();
+    setLoading(false);
   }, []);
-
-  const loadUser = async () => {
-    try {
-      const userJSON = await storage.getItem("@CinemaApp:currentUser");
-      if (userJSON) {
-        setUser(JSON.parse(userJSON));
-      }
-    } catch (error) {
-      console.error("Lỗi khi load user:", error);
-    }
-  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -64,14 +55,9 @@ export default function Profile() {
     });
 
     if (!result.canceled && result.assets[0].uri) {
-      // Cập nhật avatar
       const updatedUser = { ...user, avatar: result.assets[0].uri };
-      await storage.setItem(
-        "@CinemaApp:currentUser",
-        JSON.stringify(updatedUser),
-      );
+      await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
 
-      // Cập nhật trong danh sách users
       const usersJSON = await storage.getItem("@CinemaApp:users");
       if (usersJSON) {
         let users = JSON.parse(usersJSON);
@@ -82,21 +68,32 @@ export default function Profile() {
         }
       }
 
-      setUser(updatedUser);
       Alert.alert("Thành công", "Đã cập nhật ảnh đại diện!");
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLogoutVisible(false);
-    navigation.replace("LoginSignUp");
+    await logout();
+    // KHÔNG cần navigation.replace ở đây
+    // AppNavigator sẽ tự động chuyển sang màn hình đăng nhập khi user = null
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "#FFF", textAlign: "center", marginTop: 50 }}>
+          Đang tải...
+        </Text>
+      </View>
+    );
+  }
 
   if (!user) {
     return (
       <View style={styles.container}>
         <Text style={{ color: "#FFF", textAlign: "center", marginTop: 50 }}>
-          Đang tải...
+          Vui lòng đăng nhập
         </Text>
       </View>
     );
@@ -110,10 +107,8 @@ export default function Profile() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 120 }}
       >
-        {/* HEADER */}
         <Text style={styles.header}>Profile</Text>
 
-        {/* USER INFO */}
         <View style={styles.userRow}>
           <TouchableOpacity onPress={pickImage}>
             <Image
@@ -142,7 +137,6 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        {/* PREMIUM CARD */}
         <TouchableOpacity
           style={styles.premiumCard}
           onPress={() => navigation.navigate("PremiumAccount")}
@@ -159,7 +153,6 @@ export default function Profile() {
           </View>
         </TouchableOpacity>
 
-        {/* ACCOUNT */}
         <View style={styles.card}>
           <Text style={styles.section}>Account</Text>
           <MenuItem
@@ -178,7 +171,6 @@ export default function Profile() {
           />
         </View>
 
-        {/* GENERAL */}
         <View style={styles.card}>
           <Text style={styles.section}>General</Text>
           <MenuItem
@@ -212,7 +204,6 @@ export default function Profile() {
           />
         </View>
 
-        {/* MORE */}
         <View style={styles.card}>
           <Text style={styles.section}>More</Text>
           <MenuItem
@@ -238,7 +229,6 @@ export default function Profile() {
           />
         </View>
 
-        {/* LOGOUT */}
         <TouchableOpacity
           style={styles.logout}
           onPress={() => setLogoutVisible(true)}
@@ -247,7 +237,6 @@ export default function Profile() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* LOGOUT MODAL */}
       <Modal visible={logoutVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.logoutModal}>
@@ -262,8 +251,8 @@ export default function Profile() {
             <Text style={styles.modalTitle}>Are you sure ?</Text>
 
             <Text style={styles.modalDesc}>
-              Ullamcorper imperdiet urna id non sed est sem. Rhoncus amet, enim
-              purus gravida donec aliquet.
+              Are you sure you want to logout? You will need to login again to
+              access your account.
             </Text>
 
             <View style={styles.modalBtns}>

@@ -14,13 +14,14 @@ import BottomTabs from "../navigation/BottomTabs";
 import MovieCard from "../components/MovieCard";
 import Banner from "../components/Banner";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import storage from "../utils/storage";
+import { useAuth } from "../context/AuthContext";
 
-// Tất cả phim
+// ========== DỮ LIỆU CHUNG CHO TẤT CẢ PHIM ==========
 const ALL_MOVIES = [
   {
     id: "1",
     title: "Spider-Man No Way..",
+    fullTitle: "Spider-Man: No Way Home",
     year: "2021",
     duration: "148 Minutes",
     rating: "4.5",
@@ -35,6 +36,7 @@ const ALL_MOVIES = [
   {
     id: "2",
     title: "Riverdale",
+    fullTitle: "Riverdale",
     year: "2021",
     duration: "45 Minutes",
     rating: "4.2",
@@ -49,6 +51,7 @@ const ALL_MOVIES = [
   {
     id: "3",
     title: "Life of Pi",
+    fullTitle: "Life of Pi",
     year: "2021",
     duration: "127 Minutes",
     rating: "4.5",
@@ -62,7 +65,8 @@ const ALL_MOVIES = [
   },
   {
     id: "4",
-    title: "Black Panther: Wakanda Forever",
+    title: "Black Panther",
+    fullTitle: "Black Panther: Wakanda Forever",
     year: "2022",
     duration: "161 Minutes",
     rating: "4.7",
@@ -77,6 +81,7 @@ const ALL_MOVIES = [
   {
     id: "5",
     title: "The Batman",
+    fullTitle: "The Batman",
     year: "2022",
     duration: "176 Minutes",
     rating: "4.8",
@@ -90,7 +95,8 @@ const ALL_MOVIES = [
   },
   {
     id: "6",
-    title: "Minions: The Rise of Gru",
+    title: "Minions",
+    fullTitle: "Minions: The Rise of Gru",
     year: "2022",
     duration: "87 Minutes",
     rating: "4.5",
@@ -104,7 +110,7 @@ const ALL_MOVIES = [
   },
 ];
 
-// Phim theo category
+// Lọc phim theo category
 const getMoviesByCategory = (category) => {
   if (category === "All") return ALL_MOVIES;
   if (category === "Comedy") return ALL_MOVIES.filter(m => m.genre === "Animation");
@@ -112,6 +118,9 @@ const getMoviesByCategory = (category) => {
   if (category === "Dokumen") return ALL_MOVIES.filter(m => m.genre === "Drama");
   return ALL_MOVIES.filter(m => m.category === category);
 };
+
+// Phim sắp chiếu (Upcoming) - chỉ lấy phim có navigateTo là Trailer
+const upcomingMovies = ALL_MOVIES.filter(m => m.navigateTo === "Trailer");
 
 const banners = [
   {
@@ -134,68 +143,33 @@ const banners = [
   },
 ];
 
-const upcomingMovies = [
-  {
-    id: "1",
-    title: "Black Panther: Wakanda Forever",
-    date: "On Dec 16, 2022",
-    genre: "Action",
-    image: require("../../assets/img/black-panther-poster.png"),
-  },
-  {
-    id: "2",
-    title: "The Batman",
-    date: "On March 2, 2022",
-    genre: "Action",
-    image: require("../../assets/img/Batman-poster.png"),
-  },
-  {
-    id: "3",
-    title: "Minions",
-    date: "On July 1, 2022",
-    genre: "Animation",
-    image: require("../../assets/img/minion-poster.png"),
-  },
-];
-
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth(); // Lấy user từ AuthContext
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [displayMovies, setDisplayMovies] = useState(ALL_MOVIES);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
+  // Cập nhật danh sách phim khi đổi category
   useEffect(() => {
     setDisplayMovies(getMoviesByCategory(selectedCategory));
   }, [selectedCategory]);
 
+  // Reset search text khi focus vào Home
   useFocusEffect(
     React.useCallback(() => {
       setSearchText("");
     }, [])
   );
 
-  const loadUser = async () => {
-    try {
-      const userJSON = await storage.getItem("@CinemaApp:currentUser");
-      if (userJSON) {
-        setUser(JSON.parse(userJSON));
-      }
-    } catch (error) {
-      console.error("Lỗi khi load user:", error);
-    }
-  };
-
   const handleMoviePress = (movie) => {
     navigation.navigate(movie.navigateTo, { movie: movie });
   };
 
-  const handleUpcomingPress = (movie) => {
-    navigation.navigate("Trailer", { movie: movie });
+  const handleSearchSubmit = () => {
+    if (searchText.trim().length > 0) {
+      navigation.navigate("Search", { searchQuery: searchText, fromHome: true });
+    }
   };
 
   const categories = ["All", "Comedy", "Animation", "Dokumen"];
@@ -240,11 +214,7 @@ export default function Home() {
             style={styles.input}
             value={searchText}
             onChangeText={setSearchText}
-            onSubmitEditing={() => {
-              if (searchText.trim().length > 0) {
-                navigation.navigate("Search", { searchQuery: searchText, fromHome: true });
-              }
-            }}
+            onSubmitEditing={handleSearchSubmit}
             returnKeyType="search"
           />
           <TouchableOpacity onPress={() => navigation.navigate("Genre")}>
@@ -334,6 +304,7 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
+        {/* Upcoming Movies FlatList */}
         <FlatList
           data={upcomingMovies}
           horizontal
@@ -344,13 +315,13 @@ export default function Home() {
           ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
           renderItem={({ item }) => (
             <TouchableOpacity 
-              onPress={() => handleUpcomingPress(item)} 
+              onPress={() => handleMoviePress(item)} 
               style={styles.upcomingCard}
               activeOpacity={0.8}
             >
-              <Image source={item.image} style={styles.upcomingImage} />
+              <Image source={item.poster} style={styles.upcomingImage} />
               <Text style={styles.upcomingTitle} numberOfLines={1}>{item.title}</Text>
-              <Text style={styles.upcomingDate}>{item.date}</Text>
+              <Text style={styles.upcomingDate}>Coming Soon</Text>
               <Text style={styles.upcomingGenre}>{item.genre}</Text>
             </TouchableOpacity>
           )}

@@ -1,40 +1,23 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useWishlist } from "../context/WishlistContext";
 
-export default function MovieCard({ image, title, category, rating, onPress, movieData }) {
-  const { toggleWishlist, isInWishlist } = useWishlist();
-  
-  const movie = movieData || { id: title, title, image, rating, genre: category };
-
+export default function MovieCard({ image, title, category, rating, onPress }) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={styles.imageWrapper}>
         <Image source={image} style={styles.image} />
-        
         <View style={styles.rating}>
           <Ionicons name="star" size={14} color="#FFA500" />
           <Text style={styles.ratingText}>{rating}</Text>
         </View>
-
-        <TouchableOpacity 
-          style={styles.heartIcon}
-          onPress={(e) => {
-            e.stopPropagation();
-            toggleWishlist(movie);
-          }}
-        >
-          <Ionicons 
-            name={isInWishlist(movie.id) ? "heart" : "heart-outline"} 
-            size={18} 
-            color={isInWishlist(movie.id) ? "#FB4141" : "#FFFFFF"} 
-          />
-        </TouchableOpacity>
+        {/* ĐÃ XÓA ICON TIM */}
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {title}
+        </Text>
         <Text style={styles.category}>{category}</Text>
       </View>
     </TouchableOpacity>
@@ -73,14 +56,6 @@ const styles = StyleSheet.create({
     color: "#FF8700",
     fontFamily: "Montserrat-SemiBold",
     fontSize: 12,
-  },
-  heartIcon: {
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 20,
-    padding: 6,
   },
   info: {
     paddingHorizontal: 8,
