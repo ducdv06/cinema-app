@@ -7,7 +7,7 @@ import { DownloadProvider } from "./src/context/DownloadContext";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { WishlistProvider } from "./src/context/WishlistContext";
 
-// Import screens
+// Import screens - Auth screens
 import SplashScreen from "./src/screens/SplashScreen";
 import Onboarding1 from "./src/screens/Onboarding1";
 import Onboarding2 from "./src/screens/Onboarding2";
@@ -18,6 +18,8 @@ import SignUp from "./src/screens/SignUp";
 import ResetPassword from "./src/screens/ResetPassword";
 import Verification from "./src/screens/Verification";
 import CreateNewPassword from "./src/screens/CreateNewPassword";
+
+// Import screens - Main screens
 import Home from "./src/screens/Home";
 import Search from "./src/screens/Search";
 import Download from "./src/screens/Download";
@@ -54,7 +56,7 @@ function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!user ? (
-        // Chưa đăng nhập - hiển thị các màn hình auth
+        // Nhóm màn hình khi CHƯA đăng nhập
         <>
           <Stack.Screen name="Splash" component={SplashScreen} />
           <Stack.Screen name="Onboarding1" component={Onboarding1} />
@@ -68,7 +70,7 @@ function AppNavigator() {
           <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
         </>
       ) : (
-        // Đã đăng nhập - vào thẳng Home
+        // Nhóm màn hình khi ĐÃ đăng nhập
         <>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Search" component={Search} />
@@ -87,6 +89,10 @@ function AppNavigator() {
           <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
           <Stack.Screen name="Language" component={Language} />
           <Stack.Screen name="Notification" component={Notification} />
+          {/* THÊM CÁC MÀN HÌNH AUTH VÀO NHÓM ĐÃ ĐĂNG NHẬP */}
+          <Stack.Screen name="ResetPassword" component={ResetPassword} />
+          <Stack.Screen name="Verification" component={Verification} />
+          <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
         </>
       )}
     </Stack.Navigator>
