@@ -14,11 +14,11 @@
 
 ## Danh sách thành viên
 
-| STT | Họ và tên | MSSV | Nhiệm vụ |
-|-----|-----------|------|----------|
-| 1 | Nguyễn Ngọc Hiếu | — | Màn hình chi tiết & tích hợp: MovieDetail, SerialDetail, Trailer, MostPopularMovie, UpcomingMovie, Profile, EditProfile, PremiumAccount, PaymentMethod, PrivacyPolicy. Tích hợp dữ liệu & kiểm tra luồng điều hướng toàn bộ app |
-| 2 | Đỗ Văn Đức | — | Logic & API: AsyncStorage, AuthContext (đăng nhập/đăng ký), DownloadContext, WishlistContext, Navigation (Stack & BottomTabs), Reset Password, tích hợp expo-image-picker |
-| 3 | Trần Tuấn Phong | — | Giao diện & UI components: SplashScreen, Onboarding, Home, Search, Download, Wishlist, Genre & Categories, responsive styling |
+| STT | Họ và tên        | MSSV        | Nhiệm vụ |
+|-----|------------------|-------------|----------|
+| 1   | Nguyễn Ngọc Hiếu | 23810310326 | Màn hình chi tiết & tích hợp: MovieDetail, SerialDetail, Trailer, MostPopularMovie, UpcomingMovie, Profile, EditProfile, PremiumAccount, PaymentMethod, PrivacyPolicy. Tích hợp dữ liệu & kiểm tra luồng điều hướng toàn bộ app |
+| 2   | Đỗ Văn Đức       | 23810310329 | Logic & API: AsyncStorage, AuthContext (đăng nhập/đăng ký), DownloadContext, WishlistContext, Navigation (Stack & BottomTabs), Reset Password, tích hợp expo-image-picker                                                             |
+| 3   | Trần Tuấn Phong  | 23810310316 | Giao diện & UI components: SplashScreen, Onboarding, Home, Search, Download, Wishlist, Genre & Categories, responsive styling                                                                                                  |
 
 - **Giảng viên hướng dẫn:** ThS. Cấn Đức Điệp
 - **Ngành:** Công nghệ thông tin – **Chuyên ngành:** Công nghệ phần mềm
@@ -163,11 +163,15 @@ Hoặc quét QR code trong terminal bằng ứng dụng **Expo Go** trên điệ
 
 ## Video demo
 
-https://drive.google.com/file/d/12x-D5IIiWQNJTJSzlRAb5f_8tmh_xyNp/view?usp=sharing
+https://drive.google.com/file/d/1xkGuIZYtTyUgzg3yq6EfT0C2WbizNCdU/view?usp=sharing
 
 ---
 
+## Link figma
 
+https://www.figma.com/design/YOKn0QEdBsjZzIQhPQ2BqW/Cinemax---Movie-Apps-UI-Kit--Community-?node-id=155-1670
+
+---
 
 ## Phân công nhiệm vụ chi tiết
 
