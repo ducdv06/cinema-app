@@ -13,39 +13,27 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import storage from "../utils/storage";
 import BottomTabs from "../navigation/BottomTabs";
 import { useAuth } from "../context/AuthContext";
 
 export default function EditProfile() {
   const navigation = useNavigation();
-  const { user, setUser } = useAuth();
+  const { user, updateUser } = useAuth();
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [nameError, setNameError] = useState("");
 
   useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const userJSON = await storage.getItem("@CinemaApp:currentUser");
-      if (userJSON) {
-        const userData = JSON.parse(userJSON);
-        setFullName(userData.fullName || "");
-        setEmail(userData.email || "");
-        setPhone(userData.phone || "");
-        setAvatar(userData.avatar || null);
-      }
-    } catch (error) {
-      console.error("Lỗi khi load user:", error);
+    if (user) {
+      setFullName(user.fullName || "");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+      setAvatar(user.avatar || null);
     }
-  };
+  }, [user]);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -67,23 +55,9 @@ export default function EditProfile() {
     }
   };
 
-  const validateName = (name) => {
-    if (name.length < 2) {
-      setNameError("* Name must be at least 2 characters");
-      return false;
-    }
-    setNameError("");
-    return true;
-  };
-
   const handleSave = async () => {
     if (!fullName.trim()) {
       Alert.alert("Lỗi", "Vui lòng nhập họ và tên");
-      return;
-    }
-
-    if (fullName.length < 2) {
-      Alert.alert("Lỗi", "Tên phải có ít nhất 2 ký tự");
       return;
     }
 
@@ -101,46 +75,21 @@ export default function EditProfile() {
     setLoading(true);
 
     try {
-      // Lấy thông tin user hiện tại
-      const currentUserJSON = await storage.getItem("@CinemaApp:currentUser");
-      if (!currentUserJSON) {
-        Alert.alert("Lỗi", "Không tìm thấy thông tin user");
-        setLoading(false);
-        return;
+      const success = await updateUser({
+        fullName,
+        email,
+        phone,
+        avatar,
+      });
+
+      if (success) {
+        Alert.alert("Thành công", "Đã cập nhật thông tin!", [
+          { text: "OK", onPress: () => navigation.goBack() }
+        ]);
+      } else {
+        Alert.alert("Lỗi", "Không thể cập nhật thông tin");
       }
-
-      const currentUser = JSON.parse(currentUserJSON);
-      
-      // Cập nhật current user
-      const updatedUser = {
-        ...currentUser,
-        fullName: fullName,
-        email: email,
-        phone: phone,
-        avatar: avatar,
-      };
-      
-      await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
-
-      // Cập nhật trong danh sách users
-      const usersJSON = await storage.getItem("@CinemaApp:users");
-      if (usersJSON) {
-        let users = JSON.parse(usersJSON);
-        const index = users.findIndex(u => u.id === currentUser.id);
-        if (index !== -1) {
-          users[index] = { ...users[index], fullName, email, phone, avatar };
-          await storage.setItem("@CinemaApp:users", JSON.stringify(users));
-        }
-      }
-
-      // Cập nhật context
-      setUser(updatedUser);
-
-      Alert.alert("Thành công", "Đã cập nhật thông tin!", [
-        { text: "OK", onPress: () => navigation.goBack() }
-      ]);
     } catch (error) {
-      console.error("Lỗi khi cập nhật:", error);
       Alert.alert("Lỗi", "Không thể cập nhật thông tin");
     } finally {
       setLoading(false);
@@ -151,19 +100,14 @@ export default function EditProfile() {
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* HEADER */}
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backBtn}
-              onPress={() => navigation.goBack()}
-            >
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="chevron-back" size={20} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Edit Profile</Text>
             <View style={{ width: 36 }} />
           </View>
 
-          {/* AVATAR */}
           <View style={styles.avatarSection}>
             <TouchableOpacity onPress={pickImage} style={styles.avatarWrapper}>
               <Image
@@ -177,26 +121,17 @@ export default function EditProfile() {
             <Text style={styles.avatarHint}>Tap to change photo</Text>
           </View>
 
-          {/* FORM */}
           <View style={styles.content}>
-            {/* Full Name */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Full Name</Text>
               <TextInput
                 value={fullName}
-                onChangeText={(text) => {
-                  setFullName(text);
-                  validateName(text);
-                }}
+                onChangeText={setFullName}
                 placeholderTextColor="#8A8A9E"
-                style={[styles.input, nameError ? styles.inputError : null]}
+                style={styles.input}
               />
-              {nameError ? (
-                <Text style={styles.errorText}>{nameError}</Text>
-              ) : null}
             </View>
 
-            {/* Email */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
@@ -209,7 +144,6 @@ export default function EditProfile() {
               />
             </View>
 
-            {/* Phone Number */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Phone Number</Text>
               <TextInput
@@ -222,7 +156,6 @@ export default function EditProfile() {
             </View>
           </View>
 
-          {/* SAVE BUTTON */}
           <View style={styles.buttonWrap}>
             <TouchableOpacity
               onPress={handleSave}
@@ -276,7 +209,6 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratSemiBold",
     fontSize: 16,
     fontWeight: "600",
-    letterSpacing: 0.12,
   },
   avatarSection: {
     alignItems: "center",
@@ -328,7 +260,6 @@ const styles = StyleSheet.create({
     color: "#EBEBEF",
     fontFamily: "MontserratMedium",
     fontSize: 12,
-    letterSpacing: 0.12,
   },
   input: {
     height: 60,
@@ -340,17 +271,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontFamily: "MontserratMedium",
     fontSize: 14,
-    letterSpacing: 0.12,
-  },
-  inputError: {
-    borderColor: "#FB4141",
-  },
-  errorText: {
-    color: "#FB4141",
-    fontFamily: "MontserratMedium",
-    fontSize: 11,
-    marginTop: 6,
-    marginLeft: 18,
   },
   buttonWrap: {
     marginTop: 40,

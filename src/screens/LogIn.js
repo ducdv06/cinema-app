@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,11 +15,18 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigation = useNavigation();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Nếu đã có user, chuyển thẳng về Home
+  useEffect(() => {
+    if (user) {
+      navigation.replace("Home");
+    }
+  }, [user]);
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -39,13 +46,12 @@ export default function Login() {
       
       if (success) {
         Alert.alert("Thành công", "Đăng nhập thành công!");
-        // KHÔNG cần navigation.replace ở đây
-        // AppNavigator sẽ tự động chuyển sang Home khi user thay đổi
+        // useEffect sẽ tự động chuyển về Home
       } else {
         Alert.alert("Lỗi", "Email hoặc mật khẩu không đúng");
       }
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể đăng nhập. Vui lòng thử lại.");
+      Alert.alert("Lỗi", "Không thể đăng nhập");
     } finally {
       setLoading(false);
     }

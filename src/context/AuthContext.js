@@ -16,26 +16,60 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    autoLogin();
+    checkAndClearIfNeeded();
   }, []);
 
-  const autoLogin = async () => {
+  const checkAndClearIfNeeded = async () => {
     try {
-      console.log("=== AUTO LOGIN CHECK ===");
-      const userJSON = await storage.getItem("@CinemaApp:currentUser");
-      console.log("User từ storage:", userJSON);
+      const lastRunTime = await storage.getItem("@CinemaApp:lastRunTime");
+      const currentTime = Date.now();
+      const TIMEOUT_MS = 60000; // 60 giây
       
-      if (userJSON) {
-        const userData = JSON.parse(userJSON);
-        setUser(userData);
-        console.log("✅ Auto login thành công:", userData.email);
+      console.log("=== KIỂM TRA THỜI GIAN CHẠY ===");
+      console.log("Lần chạy trước:", lastRunTime);
+      console.log("Thời gian hiện tại:", currentTime);
+      
+      if (lastRunTime) {
+        const diff = currentTime - parseInt(lastRunTime);
+        console.log("Chênh lệch:", diff, "ms");
+        
+        if (diff > TIMEOUT_MS) {
+          // Quá 60 giây - xóa hết dữ liệu
+          console.log("=== QUÁ 60 GIÂY - XÓA TOÀN BỘ DỮ LIỆU ===");
+          await storage.removeItem("@CinemaApp:currentUser");
+          await storage.removeItem("@CinemaApp:users");
+          await storage.removeItem("@CinemaApp:wishlist");
+          await storage.removeItem("@CinemaApp:resetOTP");
+          setUser(null);
+          console.log("✅ Đã xóa toàn bộ dữ liệu!");
+        } else {
+          // Dưới 60 giây - giữ nguyên user (auto login)
+          console.log("=== DƯỚI 60 GIÂY - GIỮ NGUYÊN DỮ LIỆU (AUTO LOGIN) ===");
+          const userJSON = await storage.getItem("@CinemaApp:currentUser");
+          if (userJSON) {
+            setUser(JSON.parse(userJSON));
+            console.log("✅ Auto login thành công:", JSON.parse(userJSON).email);
+          } else {
+            setUser(null);
+            console.log("❌ Không có user trong storage");
+          }
+        }
       } else {
-        console.log("❌ Không có user trong storage");
+        // Lần đầu chạy - xóa hết
+        console.log("=== LẦN ĐẦU CHẠY - XÓA TOÀN BỘ DỮ LIỆU ===");
+        await storage.removeItem("@CinemaApp:currentUser");
+        await storage.removeItem("@CinemaApp:users");
+        await storage.removeItem("@CinemaApp:wishlist");
+        await storage.removeItem("@CinemaApp:resetOTP");
         setUser(null);
+        console.log("✅ Đã xóa toàn bộ dữ liệu!");
       }
+      
+      // Cập nhật thời gian chạy hiện tại
+      await storage.setItem("@CinemaApp:lastRunTime", currentTime.toString());
+      
     } catch (error) {
-      console.error("Lỗi auto login:", error);
-      setUser(null);
+      console.error("Lỗi kiểm tra:", error);
     } finally {
       setLoading(false);
     }
@@ -102,25 +136,43 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      console.log("=== LOGOUT - XÓA TOÀN BỘ DỮ LIỆU ===");
-      // Xóa currentUser (session hiện tại)
+      console.log("=== LOGOUT ===");
       await storage.removeItem("@CinemaApp:currentUser");
-      // Xóa toàn bộ users database
-      await storage.removeItem("@CinemaApp:users");
-      // Xóa wishlist
-      await storage.removeItem("@CinemaApp:wishlist");
-      // Xóa các dữ liệu khác nếu có
-      await storage.removeItem("@CinemaApp:resetOTP");
-      
       setUser(null);
-      console.log("✅ Đã xóa toàn bộ dữ liệu user!");
+      console.log("✅ Logout thành công");
     } catch (error) {
       console.error("Lỗi logout:", error);
     }
   };
 
+  const updateUser = async (updatedData) => {
+    try {
+      if (!user) return false;
+      
+      const updatedUser = { ...user, ...updatedData };
+      await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      
+      const usersJSON = await storage.getItem("@CinemaApp:users");
+      if (usersJSON) {
+        let users = JSON.parse(usersJSON);
+        const index = users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+          users[index] = { ...users[index], ...updatedData };
+          await storage.setItem("@CinemaApp:users", JSON.stringify(users));
+        }
+      }
+      
+      console.log("✅ Cập nhật user thành công");
+      return true;
+    } catch (error) {
+      console.error("Lỗi update user:", error);
+      return false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

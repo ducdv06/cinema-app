@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -45,11 +45,9 @@ export default function CreateNewPassword() {
     setLoading(true);
 
     try {
-      // Lấy danh sách users
       const usersJSON = await storage.getItem(USERS_STORAGE_KEY);
       let users = usersJSON ? JSON.parse(usersJSON) : [];
 
-      // Tìm user cần đổi mật khẩu
       const userIndex = users.findIndex(u => u.email === email);
       
       if (userIndex === -1) {
@@ -58,25 +56,21 @@ export default function CreateNewPassword() {
         return;
       }
 
-      // Cập nhật mật khẩu mới
       users[userIndex].password = password;
       await storage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
-      // QUAN TRỌNG: Xóa currentUser để session cũ không còn
+      // Xóa currentUser nếu có
       await storage.removeItem("@CinemaApp:currentUser");
-      
-      // Xóa luôn OTP đã dùng
       await storage.removeItem("@CinemaApp:resetOTP");
 
       Alert.alert(
         "Thành công",
-        "Mật khẩu đã được thay đổi! Vui lòng đăng nhập lại.",
+        "Mật khẩu đã được thay đổi! Vui lòng đăng nhập.",
         [
           {
             text: "Đăng nhập",
             onPress: () => {
-              // Sử dụng replace để quay về Login và không thể quay lại
-              navigation.replace("Login");
+              navigation.navigate("Login");
             }
           }
         ]
@@ -103,7 +97,6 @@ export default function CreateNewPassword() {
         <Text style={styles.title}>Create New Password</Text>
         <Text style={styles.subtitle}>Enter your new password</Text>
 
-        {/* New Password */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>New Password</Text>
           <View style={styles.passwordBox}>
@@ -116,16 +109,11 @@ export default function CreateNewPassword() {
               style={styles.passwordInput}
             />
             <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-              <Ionicons
-                name={passwordVisible ? "eye" : "eye-off"}
-                size={22}
-                color="#7C7C90"
-              />
+              <Ionicons name={passwordVisible ? "eye" : "eye-off"} size={22} color="#7C7C90" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Confirm Password */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Confirm Password</Text>
           <View style={styles.passwordBox}>
@@ -138,11 +126,7 @@ export default function CreateNewPassword() {
               style={styles.passwordInput}
             />
             <TouchableOpacity onPress={() => setConfirmVisible(!confirmVisible)}>
-              <Ionicons
-                name={confirmVisible ? "eye" : "eye-off"}
-                size={22}
-                color="#7C7C90"
-              />
+              <Ionicons name={confirmVisible ? "eye" : "eye-off"} size={22} color="#7C7C90" />
             </TouchableOpacity>
           </View>
         </View>
@@ -197,7 +181,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontFamily: "PoppinsSemiBold",
     fontSize: 24,
-    letterSpacing: 0.12,
     textAlign: "center",
   },
   subtitle: {

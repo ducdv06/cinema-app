@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Image, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -7,7 +7,7 @@ import { DownloadProvider } from "./src/context/DownloadContext";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import { WishlistProvider } from "./src/context/WishlistContext";
 
-// Import screens - Auth screens
+// Import tất cả màn hình
 import SplashScreen from "./src/screens/SplashScreen";
 import Onboarding1 from "./src/screens/Onboarding1";
 import Onboarding2 from "./src/screens/Onboarding2";
@@ -18,8 +18,6 @@ import SignUp from "./src/screens/SignUp";
 import ResetPassword from "./src/screens/ResetPassword";
 import Verification from "./src/screens/Verification";
 import CreateNewPassword from "./src/screens/CreateNewPassword";
-
-// Import screens - Main screens
 import Home from "./src/screens/Home";
 import Search from "./src/screens/Search";
 import Download from "./src/screens/Download";
@@ -39,65 +37,6 @@ import Notification from "./src/screens/Notification";
 import Language from "./src/screens/Language";
 
 const Stack = createNativeStackNavigator();
-
-// Component điều hướng chính
-function AppNavigator() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image source={require("./assets/img/logo.png")} style={styles.loadingLogo} />
-        <ActivityIndicator size="large" color="#12CDD9" style={{ marginTop: 20 }} />
-      </View>
-    );
-  }
-
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!user ? (
-        // Nhóm màn hình khi CHƯA đăng nhập
-        <>
-          <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="Onboarding1" component={Onboarding1} />
-          <Stack.Screen name="Onboarding2" component={Onboarding2} />
-          <Stack.Screen name="Onboarding3" component={Onboarding3} />
-          <Stack.Screen name="LoginSignUp" component={LoginSignUp} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="SignUp" component={SignUp} />
-          <Stack.Screen name="ResetPassword" component={ResetPassword} />
-          <Stack.Screen name="Verification" component={Verification} />
-          <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
-        </>
-      ) : (
-        // Nhóm màn hình khi ĐÃ đăng nhập
-        <>
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="Search" component={Search} />
-          <Stack.Screen name="Download" component={Download} />
-          <Stack.Screen name="Wishlist" component={WishList} />
-          <Stack.Screen name="MovieDetail" component={MovieDetail} />
-          <Stack.Screen name="UpcomingMovies" component={UpcomingMovie} />
-          <Stack.Screen name="Genre" component={Genre} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="MostPopularMovie" component={MostPopularMovie} />
-          <Stack.Screen name="Trailer" component={Trailer} />
-          <Stack.Screen name="SerialDetail" component={SerialDetail} />
-          <Stack.Screen name="EditProfile" component={EditProfile} />
-          <Stack.Screen name="PremiumAccount" component={PremiumAccount} />
-          <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
-          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-          <Stack.Screen name="Language" component={Language} />
-          <Stack.Screen name="Notification" component={Notification} />
-          {/* THÊM CÁC MÀN HÌNH AUTH VÀO NHÓM ĐÃ ĐĂNG NHẬP */}
-          <Stack.Screen name="ResetPassword" component={ResetPassword} />
-          <Stack.Screen name="Verification" component={Verification} />
-          <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
-        </>
-      )}
-    </Stack.Navigator>
-  );
-}
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -136,12 +75,52 @@ export default function App() {
       <WishlistProvider>
         <AuthProvider>
           <NavigationContainer>
-            <AppNavigator />
+            <AppStack />
           </NavigationContainer>
         </AuthProvider>
       </WishlistProvider>
       <StatusBar style="auto" />
     </DownloadProvider>
+  );
+}
+
+// Tách riêng component AppStack để dùng useAuth
+function AppStack() {
+  const { user } = useAuth();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {/* Màn hình auth - luôn có, nhưng nếu đã login thì navigate thẳng */}
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Onboarding1" component={Onboarding1} />
+      <Stack.Screen name="Onboarding2" component={Onboarding2} />
+      <Stack.Screen name="Onboarding3" component={Onboarding3} />
+      <Stack.Screen name="LoginSignUp" component={LoginSignUp} />
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="ResetPassword" component={ResetPassword} />
+      <Stack.Screen name="Verification" component={Verification} />
+      <Stack.Screen name="CreateNewPassword" component={CreateNewPassword} />
+      
+      {/* Màn hình chính */}
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Search" component={Search} />
+      <Stack.Screen name="Download" component={Download} />
+      <Stack.Screen name="Wishlist" component={WishList} />
+      <Stack.Screen name="MovieDetail" component={MovieDetail} />
+      <Stack.Screen name="UpcomingMovies" component={UpcomingMovie} />
+      <Stack.Screen name="Genre" component={Genre} />
+      <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="MostPopularMovie" component={MostPopularMovie} />
+      <Stack.Screen name="Trailer" component={Trailer} />
+      <Stack.Screen name="SerialDetail" component={SerialDetail} />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="PremiumAccount" component={PremiumAccount} />
+      <Stack.Screen name="PaymentMethod" component={PaymentMethod} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+      <Stack.Screen name="Language" component={Language} />
+      <Stack.Screen name="Notification" component={Notification} />
+    </Stack.Navigator>
   );
 }
 

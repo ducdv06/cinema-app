@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import BottomTabs from "../navigation/BottomTabs";
 import { useNavigation } from "@react-navigation/native";
-import storage from "../utils/storage";
 import { useAuth } from "../context/AuthContext";
 
 const MenuItem = ({ icon, title, onPress }) => {
@@ -31,31 +30,13 @@ const MenuItem = ({ icon, title, onPress }) => {
 
 export default function Profile() {
   const navigation = useNavigation();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [logoutVisible, setLogoutVisible] = useState(false);
-  const [localUser, setLocalUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadUser();
+    setLoading(false);
   }, [user]);
-
-  const loadUser = async () => {
-    try {
-      if (user) {
-        setLocalUser(user);
-      } else {
-        const userJSON = await storage.getItem("@CinemaApp:currentUser");
-        if (userJSON) {
-          setLocalUser(JSON.parse(userJSON));
-        }
-      }
-    } catch (error) {
-      console.error("Lỗi khi load user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -73,20 +54,7 @@ export default function Profile() {
     });
 
     if (!result.canceled && result.assets[0].uri) {
-      const updatedUser = { ...localUser, avatar: result.assets[0].uri };
-      await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
-
-      const usersJSON = await storage.getItem("@CinemaApp:users");
-      if (usersJSON) {
-        let users = JSON.parse(usersJSON);
-        const index = users.findIndex((u) => u.id === localUser.id);
-        if (index !== -1) {
-          users[index].avatar = result.assets[0].uri;
-          await storage.setItem("@CinemaApp:users", JSON.stringify(users));
-        }
-      }
-
-      setLocalUser(updatedUser);
+      await updateUser({ avatar: result.assets[0].uri });
       Alert.alert("Thành công", "Đã cập nhật ảnh đại diện!");
     }
   };
@@ -94,10 +62,8 @@ export default function Profile() {
   const handleLogout = async () => {
     setLogoutVisible(false);
     await logout();
-  };
-
-  const handleChangePassword = () => {
-    navigation.navigate("ResetPassword");
+    // Chuyển về màn hình Login
+    navigation.replace("Login");
   };
 
   if (loading) {
@@ -110,12 +76,18 @@ export default function Profile() {
     );
   }
 
-  if (!localUser) {
+  if (!user) {
     return (
       <View style={styles.container}>
         <Text style={{ color: "#FFF", textAlign: "center", marginTop: 50 }}>
           Vui lòng đăng nhập
         </Text>
+        <TouchableOpacity
+          style={styles.loginBtn}
+          onPress={() => navigation.replace("Login")}
+        >
+          <Text style={styles.loginBtnText}>Đăng nhập</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -134,8 +106,8 @@ export default function Profile() {
           <TouchableOpacity onPress={pickImage}>
             <Image
               source={
-                localUser?.avatar
-                  ? { uri: localUser.avatar }
+                user?.avatar
+                  ? { uri: user.avatar }
                   : require("../../assets/icons/avatar-profile.png")
               }
               style={styles.avatar}
@@ -145,10 +117,9 @@ export default function Profile() {
             </View>
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{localUser?.fullName || "Tiffany"}</Text>
-            <Text style={styles.email}>
-              {localUser?.email || "Tiffanyjersey@gmail.com"}
-            </Text>
+            <Text style={styles.name}>{user?.fullName || "Tiffany"}</Text>
+            <Text style={styles.email}>{user?.email || "Tiffanyjersey@gmail.com"}</Text>
+            {user?.phone ? <Text style={styles.phone}>{user.phone}</Text> : null}
           </View>
           <TouchableOpacity
             style={styles.editBtn}
@@ -188,7 +159,7 @@ export default function Profile() {
             icon={
               <Image source={require("../../assets/icons/lock-icon.png")} />
             }
-            onPress={handleChangePassword}
+            onPress={() => navigation.navigate("ResetPassword")}
           />
         </View>
 
@@ -345,6 +316,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     marginTop: 8,
+  },
+  phone: {
+    color: "#92929D",
+    fontFamily: "MontserratMedium",
+    fontSize: 12,
+    marginTop: 4,
   },
   editBtn: {
     width: 24,
@@ -528,5 +505,18 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratSemiBold",
     fontSize: 14,
     fontWeight: "600",
+  },
+  loginBtn: {
+    backgroundColor: "#12CDD9",
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignSelf: "center",
+    marginTop: 20,
+  },
+  loginBtnText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "MontserratSemiBold",
   },
 });
