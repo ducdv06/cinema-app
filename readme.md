@@ -161,10 +161,15 @@ Hoặc quét QR code trong terminal bằng ứng dụng **Expo Go** trên điệ
 
 ---
 
-## Video demo
+## Video demo:
 
+- **Do trong quá trình làm bài chúng em tham chiếu bằng máy của 1 bạn nhưng khi quay bản cuối cùng thì lại là máy khác nên có một chút không khớp với UI chuẩn của máy ban đầu mong thầy thông cảm và châm trước cho bọn em ạ.
+
+- **link video cuối cùng
 https://drive.google.com/file/d/1xkGuIZYtTyUgzg3yq6EfT0C2WbizNCdU/view?usp=sharing
 
+- **link ban đầu (UI chuẩn)
+https://drive.google.com/file/d/1yudjOKTuXr___bQ2JSHppuZtkvx1dWEg/view
 ---
 
 ## Link figma
