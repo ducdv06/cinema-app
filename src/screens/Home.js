@@ -172,7 +172,7 @@ export default function Home() {
     }
   };
 
-  const categories = ["All", "Comedy", "Animation", "Dokumen"];
+  const categories = ["All", "Comedy", "Animation", "Document"];
 
   return (
     <View style={styles.container}>

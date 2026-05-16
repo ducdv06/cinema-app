@@ -14,17 +14,18 @@ const CONTENT = [
     id: "1",
     title: "Terms",
     paragraphs: [
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci sem sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.",
-    ],
+      "Welcome to our movie streaming application. By accessing and using this app, you agree to comply with these terms and conditions.",
+      "We may collect certain information such as your email (if provided), viewing activity (movies watched, search history), and device information (device type, operating system).",
+      "This data is used to improve your experience, provide personalized movie recommendations, enhance app performance, and ensure system security.",
+      "We do not sell or share your personal information with third parties, except when required by law or with your consent.",    ],
   },
   {
     id: "2",
     title: "Changes to the Service and/or Terms:",
     paragraphs: [
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Eget ornare quam vel facilisis feugiat amet sagittis arcu, tortor. Sapien, consequat ultrices morbi orci semper sit nulla. Leo auctor ut etiam est, amet aliquet ut vivamus. Odio vulputate est id tincidunt fames.",
-    ],
+      "We reserve the right to update or modify these terms at any time without prior notice.",
+      "Any changes will take effect immediately after being published within the application.",
+      "By continuing to use the app after updates, you agree to the revised terms. We recommend reviewing this policy regularly.",],
   },
 ];
 

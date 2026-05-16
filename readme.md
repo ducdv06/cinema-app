@@ -97,15 +97,73 @@ Hoặc quét QR code trong terminal bằng ứng dụng **Expo Go** trên điệ
 
 ---
 
-## Hình ảnh minh họa hệ thống
+## 📸 Screenshots
 
-Đã có trong báo cáo
+### 🚀 Splash
+![Splash](assets/img/splash.jpg)
+
+### 👋 Onboarding
+![Onboarding 1](assets/img/onboarding1.jpg)
+![Onboarding 2](assets/img/onboarding2.jpg)
+![Onboarding 3](assets/img/onboarding3.jpg)
+
+### 🔐 Authentication (Login / Signup)
+![Login-Signup](assets/img/login-signup.jpg)
+![Login](assets/img/login.jpg)
+![Signup](assets/img/signup.jpg)
+
+### 🏠 Home
+![Home](assets/img/home.jpg)
+
+### 🔍 Search
+![Search](assets/img/search.jpg)
+
+### 🎬 Genre
+![Genre](assets/img/genre.jpg)
+
+### 🔥 Popular
+![Popular](assets/img/popular.jpg)
+
+### ⏳ Upcoming
+![Upcoming](assets/img/upcoming.jpg)
+
+### 🌐 Language
+![Language](assets/img/language.jpg)
+
+### 🎥 Movie Detail
+![Movie Detail](assets/img/moviedetail.jpg)
+
+### ❤️ Wishlist
+![Wishlist](assets/img/wishlist.jpg)
+
+### ⬇️ Download
+![Download](assets/img/download.jpg)
+
+### ⚙️ Settings
+![Settings 1](assets/img/setting1.jpg)
+![Settings 2](assets/img/setting2.jpg)
+
+### 💳 Payment
+![Payment](assets/img/payment.jpg)
+![Payment Method](assets/img/paymentmethod.jpg)
+![Payment Success](assets/img/paymentsuccess.jpg)
+
+### 🔔 Notification
+![Notification](assets/img/notification.jpg)
+
+### 🔑 Reset Password
+![Reset 1](assets/img/resetpassword1.jpg)
+![Reset 2](assets/img/resetpassword2.jpg)
+![Reset 3](assets/img/resetpassword3.jpg)
+
+### 📜 Policy
+![Policy](assets/img/policy.jpg)
 
 ---
 
 ## Video demo
 
-https://drive.google.com/file/d/1yudjOKTuXr___bQ2JSHppuZtkvx1dWEg/view
+>  
 
 ---
 
@@ -113,11 +171,11 @@ https://drive.google.com/file/d/1yudjOKTuXr___bQ2JSHppuZtkvx1dWEg/view
 
 ## Phân công nhiệm vụ chi tiết
 
-| Thành viên | Phần phụ trách | Mức độ đóng góp |
-|---|---|---|
-| Nguyễn Ngọc Hiếu | UI màn hình chi tiết, tích hợp dữ liệu, kiểm tra điều hướng | ~34% |
-| Đỗ Văn Đức | Logic xác thực, quản lý state, cấu hình navigation, API | ~33% |
-| Trần Tuấn Phong | UI components cơ bản, màn hình chính, responsive styling | ~33% |
+| Thành viên       | Phần phụ trách                                              | Mức độ đóng góp |
+|------------------|-------------------------------------------------------------|-----------------|
+| Nguyễn Ngọc Hiếu | UI màn hình chi tiết, tích hợp dữ liệu, kiểm tra điều hướng | ~34%            |
+| Đỗ Văn Đức       | Logic xác thực, quản lý state, cấu hình navigation, API     | ~33%            |
+| Trần Tuấn Phong  | UI components cơ bản, màn hình chính, responsive styling    | ~33%            |
 
 ---
 
