@@ -33,11 +33,29 @@ export default function Profile() {
   const navigation = useNavigation();
   const { user, logout } = useAuth();
   const [logoutVisible, setLogoutVisible] = useState(false);
+  const [localUser, setLocalUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
-  }, []);
+    loadUser();
+  }, [user]);
+
+  const loadUser = async () => {
+    try {
+      if (user) {
+        setLocalUser(user);
+      } else {
+        const userJSON = await storage.getItem("@CinemaApp:currentUser");
+        if (userJSON) {
+          setLocalUser(JSON.parse(userJSON));
+        }
+      }
+    } catch (error) {
+      console.error("Lỗi khi load user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,26 +66,27 @@ export default function Profile() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
     });
 
     if (!result.canceled && result.assets[0].uri) {
-      const updatedUser = { ...user, avatar: result.assets[0].uri };
+      const updatedUser = { ...localUser, avatar: result.assets[0].uri };
       await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
 
       const usersJSON = await storage.getItem("@CinemaApp:users");
       if (usersJSON) {
         let users = JSON.parse(usersJSON);
-        const index = users.findIndex((u) => u.id === user.id);
+        const index = users.findIndex((u) => u.id === localUser.id);
         if (index !== -1) {
           users[index].avatar = result.assets[0].uri;
           await storage.setItem("@CinemaApp:users", JSON.stringify(users));
         }
       }
 
+      setLocalUser(updatedUser);
       Alert.alert("Thành công", "Đã cập nhật ảnh đại diện!");
     }
   };
@@ -75,8 +94,10 @@ export default function Profile() {
   const handleLogout = async () => {
     setLogoutVisible(false);
     await logout();
-    // KHÔNG cần navigation.replace ở đây
-    // AppNavigator sẽ tự động chuyển sang màn hình đăng nhập khi user = null
+  };
+
+  const handleChangePassword = () => {
+    navigation.navigate("ResetPassword");
   };
 
   if (loading) {
@@ -89,7 +110,7 @@ export default function Profile() {
     );
   }
 
-  if (!user) {
+  if (!localUser) {
     return (
       <View style={styles.container}>
         <Text style={{ color: "#FFF", textAlign: "center", marginTop: 50 }}>
@@ -113,8 +134,8 @@ export default function Profile() {
           <TouchableOpacity onPress={pickImage}>
             <Image
               source={
-                user?.avatar
-                  ? { uri: user.avatar }
+                localUser?.avatar
+                  ? { uri: localUser.avatar }
                   : require("../../assets/icons/avatar-profile.png")
               }
               style={styles.avatar}
@@ -124,9 +145,9 @@ export default function Profile() {
             </View>
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.name}>{user?.fullName || "Tiffany"}</Text>
+            <Text style={styles.name}>{localUser?.fullName || "Tiffany"}</Text>
             <Text style={styles.email}>
-              {user?.email || "Tiffanyjersey@gmail.com"}
+              {localUser?.email || "Tiffanyjersey@gmail.com"}
             </Text>
           </View>
           <TouchableOpacity
@@ -167,7 +188,7 @@ export default function Profile() {
             icon={
               <Image source={require("../../assets/icons/lock-icon.png")} />
             }
-            onPress={() => navigation.navigate("ResetPassword")}
+            onPress={handleChangePassword}
           />
         </View>
 

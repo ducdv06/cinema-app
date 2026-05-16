@@ -15,27 +15,28 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import storage from "../utils/storage";
 import BottomTabs from "../navigation/BottomTabs";
+import { useAuth } from "../context/AuthContext";
 
 export default function EditProfile() {
   const navigation = useNavigation();
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useAuth();
+  
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState(null);
-  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   useEffect(() => {
-    loadUser();
+    loadUserData();
   }, []);
 
-  const loadUser = async () => {
+  const loadUserData = async () => {
     try {
       const userJSON = await storage.getItem("@CinemaApp:currentUser");
       if (userJSON) {
         const userData = JSON.parse(userJSON);
-        setUser(userData);
         setFullName(userData.fullName || "");
         setEmail(userData.email || "");
         setPhone(userData.phone || "");
@@ -48,14 +49,14 @@ export default function EditProfile() {
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== "granted") {
       Alert.alert("Lỗi", "Cần cấp quyền truy cập ảnh để đổi avatar!");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -66,9 +67,23 @@ export default function EditProfile() {
     }
   };
 
+  const validateName = (name) => {
+    if (name.length < 2) {
+      setNameError("* Name must be at least 2 characters");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
+
   const handleSave = async () => {
     if (!fullName.trim()) {
       Alert.alert("Lỗi", "Vui lòng nhập họ và tên");
+      return;
+    }
+
+    if (fullName.length < 2) {
+      Alert.alert("Lỗi", "Tên phải có ít nhất 2 ký tự");
       return;
     }
 
@@ -86,31 +101,46 @@ export default function EditProfile() {
     setLoading(true);
 
     try {
+      // Lấy thông tin user hiện tại
+      const currentUserJSON = await storage.getItem("@CinemaApp:currentUser");
+      if (!currentUserJSON) {
+        Alert.alert("Lỗi", "Không tìm thấy thông tin user");
+        setLoading(false);
+        return;
+      }
+
+      const currentUser = JSON.parse(currentUserJSON);
+      
       // Cập nhật current user
       const updatedUser = {
-        ...user,
+        ...currentUser,
         fullName: fullName,
         email: email,
         phone: phone,
         avatar: avatar,
       };
+      
       await storage.setItem("@CinemaApp:currentUser", JSON.stringify(updatedUser));
 
       // Cập nhật trong danh sách users
       const usersJSON = await storage.getItem("@CinemaApp:users");
       if (usersJSON) {
         let users = JSON.parse(usersJSON);
-        const index = users.findIndex(u => u.id === user.id);
+        const index = users.findIndex(u => u.id === currentUser.id);
         if (index !== -1) {
           users[index] = { ...users[index], fullName, email, phone, avatar };
           await storage.setItem("@CinemaApp:users", JSON.stringify(users));
         }
       }
 
+      // Cập nhật context
+      setUser(updatedUser);
+
       Alert.alert("Thành công", "Đã cập nhật thông tin!", [
         { text: "OK", onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
+      console.error("Lỗi khi cập nhật:", error);
       Alert.alert("Lỗi", "Không thể cập nhật thông tin");
     } finally {
       setLoading(false);
@@ -144,8 +174,7 @@ export default function EditProfile() {
                 <Ionicons name="camera" size={14} color="#fff" />
               </View>
             </TouchableOpacity>
-            <Text style={styles.userName}>{fullName || "Tiffany"}</Text>
-            <Text style={styles.userEmail}>{email}</Text>
+            <Text style={styles.avatarHint}>Tap to change photo</Text>
           </View>
 
           {/* FORM */}
@@ -155,10 +184,16 @@ export default function EditProfile() {
               <Text style={styles.label}>Full Name</Text>
               <TextInput
                 value={fullName}
-                onChangeText={setFullName}
+                onChangeText={(text) => {
+                  setFullName(text);
+                  validateName(text);
+                }}
                 placeholderTextColor="#8A8A9E"
-                style={styles.input}
+                style={[styles.input, nameError ? styles.inputError : null]}
               />
+              {nameError ? (
+                <Text style={styles.errorText}>{nameError}</Text>
+              ) : null}
             </View>
 
             {/* Email */}
@@ -170,6 +205,7 @@ export default function EditProfile() {
                 placeholderTextColor="#8A8A9E"
                 style={styles.input}
                 keyboardType="email-address"
+                autoCapitalize="none"
               />
             </View>
 
@@ -253,6 +289,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: "#252836",
   },
   editIcon: {
     position: "absolute",
@@ -267,20 +304,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#1F1D2B",
   },
-  userName: {
-    color: "#FFF",
-    fontFamily: "MontserratSemiBold",
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 12,
-    letterSpacing: 0.12,
-  },
-  userEmail: {
+  avatarHint: {
     color: "#92929D",
     fontFamily: "MontserratMedium",
-    fontSize: 14,
-    marginTop: 4,
-    letterSpacing: 0.12,
+    fontSize: 12,
+    marginTop: 8,
   },
   content: {
     marginTop: 32,
@@ -313,6 +341,16 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratMedium",
     fontSize: 14,
     letterSpacing: 0.12,
+  },
+  inputError: {
+    borderColor: "#FB4141",
+  },
+  errorText: {
+    color: "#FB4141",
+    fontFamily: "MontserratMedium",
+    fontSize: 11,
+    marginTop: 6,
+    marginLeft: 18,
   },
   buttonWrap: {
     marginTop: 40,

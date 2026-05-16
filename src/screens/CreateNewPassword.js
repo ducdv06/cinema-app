@@ -25,20 +25,6 @@ export default function CreateNewPassword() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
-
-  const checkLoginStatus = async () => {
-    try {
-      const currentUser = await storage.getItem("@CinemaApp:currentUser");
-      setIsLoggedIn(!!currentUser);
-    } catch (error) {
-      console.error("Lỗi:", error);
-    }
-  };
 
   const handleReset = async () => {
     if (!password.trim()) {
@@ -76,31 +62,21 @@ export default function CreateNewPassword() {
       users[userIndex].password = password;
       await storage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
-      // Nếu đang đăng nhập, cập nhật lại currentUser
-      if (isLoggedIn) {
-        const currentUser = await storage.getItem("@CinemaApp:currentUser");
-        if (currentUser) {
-          const userData = JSON.parse(currentUser);
-          if (userData.email === email) {
-            // Không cập nhật password vào currentUser vì không cần
-          }
-        }
-      }
+      // QUAN TRỌNG: Xóa currentUser để session cũ không còn
+      await storage.removeItem("@CinemaApp:currentUser");
+      
+      // Xóa luôn OTP đã dùng
+      await storage.removeItem("@CinemaApp:resetOTP");
 
       Alert.alert(
         "Thành công",
-        "Mật khẩu đã được thay đổi!",
+        "Mật khẩu đã được thay đổi! Vui lòng đăng nhập lại.",
         [
           {
-            text: "OK",
+            text: "Đăng nhập",
             onPress: () => {
-              if (isLoggedIn) {
-                // Nếu đã đăng nhập, quay về Profile
-                navigation.replace("Profile");
-              } else {
-                // Nếu chưa đăng nhập, quay về Login
-                navigation.replace("Login");
-              }
+              // Sử dụng replace để quay về Login và không thể quay lại
+              navigation.replace("Login");
             }
           }
         ]
