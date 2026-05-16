@@ -105,7 +105,7 @@ Hoặc quét QR code trong terminal bằng ứng dụng **Expo Go** trên điệ
 
 ## Video demo
 
->  
+https://drive.google.com/file/d/1yudjOKTuXr___bQ2JSHppuZtkvx1dWEg/view
 
 ---
 
