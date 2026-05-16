@@ -163,7 +163,7 @@ Hoặc quét QR code trong terminal bằng ứng dụng **Expo Go** trên điệ
 
 ## Video demo
 
->  
+https://drive.google.com/file/d/12x-D5IIiWQNJTJSzlRAb5f_8tmh_xyNp/view?usp=sharing
 
 ---
 
